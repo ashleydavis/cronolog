@@ -8,7 +8,7 @@ import { ITaskLog } from './task-log';
 // Execute a command wrapped in a promise.
 // Pass in handlers for stdout/err.
 //
-export async function spawn(log: ITaskLog, cmd: string, args: string[], cwd?: string): Promise<string> {
+export async function spawn(log: ITaskLog, copyOutput: boolean, cmd: string, args: string[], cwd?: string): Promise<string> {
 
     console.log('## ' + cmd + ' ' + args.join(' '));
 
@@ -19,14 +19,22 @@ export async function spawn(log: ITaskLog, cmd: string, args: string[], cwd?: st
 		
 		cp.stdout.on('data', data => {
 			log.write(data.toString());
+
+			if (copyOutput) {
+				console.log(data.toString());
+			}
 		});
 
 		cp.stderr.on('data', data => {
 			log.error(data.toString());
+
+			if (copyOutput) {
+				console.error(data.toString());
+			}
 		});
 
 		cp.on('error', function (code) {
-			reject("Process errored");
+			reject("Process errored with code " + code);
         });		
         
 		cp.on('exit', function (code) {

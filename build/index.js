@@ -39,6 +39,7 @@ var chai_1 = require("chai");
 var spawn_1 = require("./lib/spawn");
 var task_log_1 = require("./lib/task-log");
 var schedule_log_1 = require("./lib/schedule-log");
+var yargs_1 = require("yargs");
 var cron = require('node-cron');
 var prettyCron = require('prettycron');
 //
@@ -167,7 +168,7 @@ var Cronolog = /** @class */ (function () {
                         _a.label = 3;
                     case 3:
                         _a.trys.push([3, 6, 8, 9]);
-                        return [4 /*yield*/, spawn_1.spawn(log, task.cmd.exe, task.cmd.args || [], task.cmd.cwd)];
+                        return [4 /*yield*/, spawn_1.spawn(log, yargs_1.argv.copyOutput, task.cmd.exe, task.cmd.args || [], task.cmd.cwd)];
                     case 4:
                         _a.sent();
                         return [4 /*yield*/, this.taskComplete(task)];

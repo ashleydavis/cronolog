@@ -4,6 +4,7 @@ import { assert } from 'chai';
 import { spawn } from './lib/spawn';
 import { TaskLog } from './lib/task-log';
 import { ScheduleLog } from './lib/schedule-log';
+import { argv } from 'yargs';
 
 var cron = require('node-cron');
 var prettyCron = require('prettycron');
@@ -173,7 +174,7 @@ export class Cronolog {
         const log = new TaskLog(task.name);
 
         try {
-            await spawn(log, task.cmd.exe, task.cmd.args || [], task.cmd.cwd);
+            await spawn(log, argv.copyOutput, task.cmd.exe, task.cmd.args || [], task.cmd.cwd);
 
             await this.taskComplete(task);
 
