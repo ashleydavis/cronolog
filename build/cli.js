@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = require("path");
 var index_1 = require("./index");
+console.log("Loading cronolog.json from " + process.cwd());
 var userConfig = require(path.join(process.cwd(), 'cronolog.json'));
 var tasks = [];
 for (var _i = 0, _a = Object.keys(userConfig); _i < _a.length; _i++) {

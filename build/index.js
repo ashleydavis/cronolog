@@ -193,21 +193,23 @@ var Cronolog = /** @class */ (function () {
     Cronolog.prototype.scheduleTasks = function () {
         var _this = this;
         var taskMap = toMap(this.config.tasks, function (task) { return task.name; }, function (task) { return task; });
+        var scheduledTasks = this.config.tasks.filter(function (task) { return task.when; });
+        if (scheduledTasks.length === 0) {
+            throw new Error("Found no scheduled tasks.");
+        }
         var _loop_1 = function (task) {
-            if (task.when) {
-                this_1.log("Scheduling task " + task.name);
-                cron.schedule(task.when, function () {
-                    _this.runTask(task, taskMap)
-                        .catch(function (err) {
-                        console.error("Unhandled exception while running task " + task.name);
-                        console.error(err.stack || err);
-                    });
+            this_1.log("Staring task " + task.name + " with schedule " + task.when);
+            cron.schedule(task.when, function () {
+                _this.runTask(task, taskMap)
+                    .catch(function (err) {
+                    console.error("Unhandled exception while running task " + task.name);
+                    console.error(err.stack || err);
                 });
-            }
+            });
         };
         var this_1 = this;
-        for (var _i = 0, _a = this.config.tasks; _i < _a.length; _i++) {
-            var task = _a[_i];
+        for (var _i = 0, scheduledTasks_1 = scheduledTasks; _i < scheduledTasks_1.length; _i++) {
+            var task = scheduledTasks_1[_i];
             _loop_1(task);
         }
     };

@@ -194,18 +194,21 @@ export class Cronolog {
                 task => task
             );
 
-        for (const task of this.config.tasks) {
-            if (task.when) {
-                this.log("Scheduling task " + task.name);
+        const scheduledTasks = this.config.tasks.filter(task => task.when);
+        if (scheduledTasks.length === 0) {
+            throw new Error("Found no scheduled tasks.");
+        }
 
-                cron.schedule(task.when, () => {
-                    this.runTask(task, taskMap)
-                        .catch(err => {
-                            console.error("Unhandled exception while running task " + task.name);
-                            console.error(err.stack || err);
-                        })
-                });
-            }
+        for (const task of scheduledTasks) {
+            this.log("Staring task " + task.name + " with schedule " + task.when);
+
+            cron.schedule(task.when, () => {
+                this.runTask(task, taskMap)
+                    .catch(err => {
+                        console.error("Unhandled exception while running task " + task.name);
+                        console.error(err.stack || err);
+                    })
+            });
         }
     };
 }

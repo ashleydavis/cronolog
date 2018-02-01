@@ -1,6 +1,8 @@
 import * as path from 'path';
 import { Cronolog, ICronologConfig, ICronologTask, ICronologCommand } from './index';
 
+console.log("Loading cronolog.json from " + process.cwd());
+
 const userConfig = require(path.join(process.cwd(), 'cronolog.json'));
 
 const tasks: ICronologTask[] = [];
