@@ -37,7 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var chai_1 = require("chai");
 var spawn_1 = require("./lib/spawn");
-var log_1 = require("./lib/log");
+var task_log_1 = require("./lib/task-log");
+var schedule_log_1 = require("./lib/schedule-log");
 var cron = require('node-cron');
 //
 // Helper function to map an array of objects.
@@ -57,6 +58,7 @@ function toMap(items, keySelector, valueSelector) {
 //
 var Cronolog = /** @class */ (function () {
     function Cronolog(config) {
+        this.scheduleLog = new schedule_log_1.ScheduleLog();
         chai_1.assert.isObject(config, "Invalid config object passed to Cronolog constructor.");
         this.config = config;
     }
@@ -74,7 +76,8 @@ var Cronolog = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 // Built on promises for future compatibility.
-                this.log("Task " + task.name + " has started."); //TODO: include the datetime it started.
+                this.log("Task " + task.name + " has started.");
+                this.scheduleLog.taskStarted(task);
                 return [2 /*return*/];
             });
         });
@@ -88,6 +91,7 @@ var Cronolog = /** @class */ (function () {
                 // Built on promises for future compatibility.
                 //todo: write to log file.
                 this.log("Task " + task.name + " has completed with no error."); //TODO: include the datetime it endeed. Include the duration of the task.
+                this.scheduleLog.taskCompleted(task);
                 return [2 /*return*/];
             });
         });
@@ -99,7 +103,7 @@ var Cronolog = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var errMsg;
             return __generator(this, function (_a) {
-                errMsg = null;
+                errMsg = "";
                 if (err.stack) {
                     errMsg = err.stack.toString();
                 }
@@ -108,6 +112,7 @@ var Cronolog = /** @class */ (function () {
                 }
                 //TODO: include the datetime it errored. Include the duration of the task.
                 this.log("Task " + task.name + " has errorred.\n" + errMsg);
+                this.scheduleLog.taskErrored(task, errMsg);
                 return [2 /*return*/];
             });
         });
@@ -157,7 +162,7 @@ var Cronolog = /** @class */ (function () {
                         return [4 /*yield*/, this.taskStarted(task)];
                     case 2:
                         _a.sent();
-                        log = new log_1.Log(task.name);
+                        log = new task_log_1.TaskLog(task.name);
                         _a.label = 3;
                     case 3:
                         _a.trys.push([3, 6, 8, 9]);

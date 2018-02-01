@@ -6,7 +6,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
 
-export interface ILog {
+export interface ITaskLog {
 
     //
     // Log a message out.
@@ -19,7 +19,7 @@ export interface ILog {
     error (msg: string): void;
 }
 
-export class Log implements ILog {
+export class TaskLog implements ITaskLog {
 
     stdout: fs.WriteStream;
     stderr: fs.WriteStream;

@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs-extra");
 var path = require("path");
 var moment = require("moment");
-var Log = /** @class */ (function () {
-    function Log(taskName) {
+var TaskLog = /** @class */ (function () {
+    function TaskLog(taskName) {
         var outputPath = path.join(process.cwd(), "output");
         fs.ensureDirSync(outputPath);
         var taskOutputPath = path.join(outputPath, taskName);
@@ -20,24 +20,24 @@ var Log = /** @class */ (function () {
     //
     // Log a message out.
     //    
-    Log.prototype.write = function (msg) {
+    TaskLog.prototype.write = function (msg) {
         this.stdout.write(msg);
     };
     //
     // Log an error
     //
-    Log.prototype.error = function (msg) {
+    TaskLog.prototype.error = function (msg) {
         this.stdout.write(msg);
         this.stderr.write(msg);
     };
     //
     // Close the output file stream.
     //
-    Log.prototype.close = function () {
+    TaskLog.prototype.close = function () {
         this.stdout.end();
         this.stderr.end();
     };
-    return Log;
+    return TaskLog;
 }());
-exports.Log = Log;
-//# sourceMappingURL=log.js.map
+exports.TaskLog = TaskLog;
+//# sourceMappingURL=task-log.js.map

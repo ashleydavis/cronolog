@@ -2,7 +2,8 @@
 import * as moment from 'moment';
 import { assert } from 'chai';
 import { spawn } from './lib/spawn';
-import { Log } from './lib/log';
+import { TaskLog } from './lib/task-log';
+import { ScheduleLog } from './lib/schedule-log';
 
 var cron = require('node-cron');
 
@@ -84,6 +85,7 @@ export interface ICronologConfig {
 export class Cronolog {
     
     config: ICronologConfig;
+    scheduleLog = new ScheduleLog();
 
     constructor(config: ICronologConfig) {
         assert.isObject(config, "Invalid config object passed to Cronolog constructor.");
@@ -104,7 +106,9 @@ export class Cronolog {
     //
     async taskStarted (task: ICronologTask): Promise<void> {
         // Built on promises for future compatibility.
-        this.log("Task " + task.name + " has started."); //TODO: include the datetime it started.
+        this.log("Task " + task.name + " has started.");
+
+        this.scheduleLog.taskStarted(task);
     }
 
     //
@@ -114,6 +118,8 @@ export class Cronolog {
         // Built on promises for future compatibility.
         //todo: write to log file.
         this.log("Task " + task.name + " has completed with no error."); //TODO: include the datetime it endeed. Include the duration of the task.
+
+        this.scheduleLog.taskCompleted(task);
     }
 
     //
@@ -122,7 +128,7 @@ export class Cronolog {
     async taskErrored (task: ICronologTask, err: any): Promise<void> {
         // Built on promises for future compatibility.
 
-        let errMsg = null;
+        let errMsg = "";
         if (err.stack) {
             errMsg = err.stack.toString();
         }
@@ -132,6 +138,8 @@ export class Cronolog {
 
         //TODO: include the datetime it errored. Include the duration of the task.
         this.log("Task " + task.name + " has errorred.\n" + errMsg);
+
+        this.scheduleLog.taskErrored(task, errMsg);
     }
 
     //
@@ -161,7 +169,7 @@ export class Cronolog {
 
         await this.taskStarted(task);
 
-        const log = new Log(task.name);
+        const log = new TaskLog(task.name);
 
         try {
             await spawn(log, task.cmd.exe, task.cmd.args, task.cmd.cwd);

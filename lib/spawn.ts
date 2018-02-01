@@ -2,13 +2,13 @@
 
 var child_process = require('child_process')
 import { argv } from 'yargs';
-import { ILog } from './log';
+import { ITaskLog } from './task-log';
 
 //
 // Execute a command wrapped in a promise.
 // Pass in handlers for stdout/err.
 //
-export async function spawn(log: ILog, cmd: string, args: string[], cwd?: string): Promise<string> {
+export async function spawn(log: ITaskLog, cmd: string, args: string[], cwd?: string): Promise<string> {
 
     console.log('## ' + cmd + ' ' + args.join(' '));
 

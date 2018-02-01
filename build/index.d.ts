@@ -1,3 +1,4 @@
+import { ScheduleLog } from './lib/schedule-log';
 export interface ICronologCommand {
     exe: string;
     args: any[];
@@ -14,6 +15,7 @@ export interface ICronologConfig {
 }
 export declare class Cronolog {
     config: ICronologConfig;
+    scheduleLog: ScheduleLog;
     constructor(config: ICronologConfig);
     log(msg: string): void;
     taskStarted(task: ICronologTask): Promise<void>;

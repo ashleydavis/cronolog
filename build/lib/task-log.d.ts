@@ -1,10 +1,10 @@
 /// <reference types="node" />
 import * as fs from 'fs-extra';
-export interface ILog {
+export interface ITaskLog {
     write(msg: string): void;
     error(msg: string): void;
 }
-export declare class Log implements ILog {
+export declare class TaskLog implements ITaskLog {
     stdout: fs.WriteStream;
     stderr: fs.WriteStream;
     constructor(taskName: string);
