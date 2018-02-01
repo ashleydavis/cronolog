@@ -1,0 +1,23 @@
+{
+    "task1": {
+        "when": "* * * * *",
+        "cmd": {
+            "exe": "echo",
+            "args": [
+                "t1"
+            ],
+            "cwd": "c:\\"
+        },
+        "dependsOn": "task2"
+    },
+
+    "task2": {
+        "cmd": {
+            "exe": "echo",
+            "args": [
+                "t2"
+            ],
+            "cwd": "c:\\"
+        }
+    }
+}

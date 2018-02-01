@@ -1,0 +1,45 @@
+{
+  "name": "cronolog",
+  "version": "1.0.4",
+  "description": "A simple light-weight cron-based task runner.",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf build/*",
+    "build": "tsc",
+    "clean-build": "rm -rf build/* && tsc",
+    "build:watch": "tsc --watch",
+    "clean-build:watch": "rm -rf build/* && tsc --watch",
+    "test": "mocha --compilers ts:ts-node/register,tsx:ts-node/register test/**/*.ts",
+    "test:watch": "mocha --compilers ts:ts-node/register,tsx:ts-node/register test/**/*.ts --watch --watch-extensions ts"
+  },
+  "bin": {
+    "cronolog": "./bin/cli"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codecapers/cronolog"
+  },
+  "keywords": [],
+  "author": "ashley@codecapers.com.au",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/codecapers/cronolog/issues"
+  },
+  "homepage": "https://github.com/codecapers/cronolog#readme",
+  "dependencies": {
+    "chai": "4.1.2",
+    "moment": "2.18.1",
+    "node-cron": "1.2.1",
+    "yargs": "11.0.0"
+  },
+  "devDependencies": {
+    "@types/chai": "4.0.4",
+    "@types/mocha": "2.2.43",
+    "@types/node": "8.0.28",
+    "@types/yargs": "10.0.1",
+    "mocha": "3.5.3",
+    "ts-node": "3.3.0",
+    "typescript": "2.5.2"
+  }
+}
