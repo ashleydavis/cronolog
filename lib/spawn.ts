@@ -2,16 +2,15 @@
 
 var child_process = require('child_process')
 import { argv } from 'yargs';
+import { ILog } from './log';
 
 //
 // Execute a command wrapped in a promise.
 // Pass in handlers for stdout/err.
 //
-export async function spawn(cmd: string, args: string[], cwd?: string): Promise<string> {
+export async function spawn(log: ILog, cmd: string, args: string[], cwd?: string): Promise<string> {
 
     console.log('## ' + cmd + ' ' + args.join(' '));
-
-    var output = "";
 
 	return new Promise<string>(function (resolve, reject) {
 		var cp = child_process.spawn(cmd, args, {
@@ -19,13 +18,11 @@ export async function spawn(cmd: string, args: string[], cwd?: string): Promise<
         });
 		
 		cp.stdout.on('data', data => {
-            var s = data.toString();
-            output += s;
-			console.log(s);
+			log.write(data.toString());
 		});
 
 		cp.stderr.on('data', data => {
-			console.error(data.toString());
+			log.error(data.toString());
 		});
 
 		cp.on('error', function (code) {
@@ -38,7 +35,7 @@ export async function spawn(cmd: string, args: string[], cwd?: string): Promise<
 				return;
 			}
 
-			resolve(output);
+			resolve(); //TODO: might be cool if one task could use the output of the other.
 		});		
 	});
 };

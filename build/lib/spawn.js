@@ -40,23 +40,19 @@ var child_process = require('child_process');
 // Execute a command wrapped in a promise.
 // Pass in handlers for stdout/err.
 //
-function spawn(cmd, args, cwd) {
+function spawn(log, cmd, args, cwd) {
     return __awaiter(this, void 0, void 0, function () {
-        var output;
         return __generator(this, function (_a) {
             console.log('## ' + cmd + ' ' + args.join(' '));
-            output = "";
             return [2 /*return*/, new Promise(function (resolve, reject) {
                     var cp = child_process.spawn(cmd, args, {
                         cwd: cwd
                     });
                     cp.stdout.on('data', function (data) {
-                        var s = data.toString();
-                        output += s;
-                        console.log(s);
+                        log.write(data.toString());
                     });
                     cp.stderr.on('data', function (data) {
-                        console.error(data.toString());
+                        log.error(data.toString());
                     });
                     cp.on('error', function (code) {
                         reject("Process errored");
@@ -66,7 +62,7 @@ function spawn(cmd, args, cwd) {
                             reject(code);
                             return;
                         }
-                        resolve(output);
+                        resolve(); //TODO: might be cool if one task could use the output of the other.
                     });
                 })];
         });

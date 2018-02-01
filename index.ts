@@ -2,6 +2,7 @@
 import * as moment from 'moment';
 import { assert } from 'chai';
 import { spawn } from './lib/spawn';
+import { Log } from './lib/log';
 
 var cron = require('node-cron');
 
@@ -93,9 +94,8 @@ export class Cronolog {
     //
     // Log events as they occur.
     //
-    async log (msg: string): Promise<void> {
+    log (msg: string): void {
         // Built on promises for future compatibility.
-        //todo: write to log file.
         console.log(msg);
     }
 
@@ -121,7 +121,6 @@ export class Cronolog {
     //
     async taskErrored (task: ICronologTask, err: any): Promise<void> {
         // Built on promises for future compatibility.
-        //todo: write to log.
 
         let errMsg = null;
         if (err.stack) {
@@ -131,7 +130,7 @@ export class Cronolog {
             errMsg = err.toString();
         }
 
-         //TODO: include the datetime it errored. Include the duration of the task.
+        //TODO: include the datetime it errored. Include the duration of the task.
         this.log("Task " + task.name + " has errorred.\n" + errMsg);
     }
 
@@ -161,14 +160,19 @@ export class Cronolog {
         await this.runTaskDependees(task, taskMap);
 
         await this.taskStarted(task);
-        
+
+        const log = new Log(task.name);
+
         try {
-            await spawn(task.cmd.exe, task.cmd.args, task.cmd.cwd);
+            await spawn(log, task.cmd.exe, task.cmd.args, task.cmd.cwd);
 
             await this.taskComplete(task);
         }
         catch (err) {
             await this.taskErrored(task, err);
+        }
+        finally {
+            log.close();
         }
     }
 

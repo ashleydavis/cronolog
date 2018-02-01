@@ -15,7 +15,7 @@ export interface ICronologConfig {
 export declare class Cronolog {
     config: ICronologConfig;
     constructor(config: ICronologConfig);
-    log(msg: string): Promise<void>;
+    log(msg: string): void;
     taskStarted(task: ICronologTask): Promise<void>;
     taskComplete(task: ICronologTask): Promise<void>;
     taskErrored(task: ICronologTask, err: any): Promise<void>;

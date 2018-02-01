@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var chai_1 = require("chai");
 var spawn_1 = require("./lib/spawn");
+var log_1 = require("./lib/log");
 var cron = require('node-cron');
 //
 // Helper function to map an array of objects.
@@ -63,14 +64,8 @@ var Cronolog = /** @class */ (function () {
     // Log events as they occur.
     //
     Cronolog.prototype.log = function (msg) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                // Built on promises for future compatibility.
-                //todo: write to log file.
-                console.log(msg);
-                return [2 /*return*/];
-            });
-        });
+        // Built on promises for future compatibility.
+        console.log(msg);
     };
     //
     // Reports that a task has started.
@@ -146,7 +141,7 @@ var Cronolog = /** @class */ (function () {
     //
     Cronolog.prototype.runTask = function (task, taskMap) {
         return __awaiter(this, void 0, void 0, function () {
-            var err_1;
+            var log, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: 
@@ -162,23 +157,27 @@ var Cronolog = /** @class */ (function () {
                         return [4 /*yield*/, this.taskStarted(task)];
                     case 2:
                         _a.sent();
+                        log = new log_1.Log(task.name);
                         _a.label = 3;
                     case 3:
-                        _a.trys.push([3, 6, , 8]);
-                        return [4 /*yield*/, spawn_1.spawn(task.cmd.exe, task.cmd.args, task.cmd.cwd)];
+                        _a.trys.push([3, 6, 8, 9]);
+                        return [4 /*yield*/, spawn_1.spawn(log, task.cmd.exe, task.cmd.args, task.cmd.cwd)];
                     case 4:
                         _a.sent();
                         return [4 /*yield*/, this.taskComplete(task)];
                     case 5:
                         _a.sent();
-                        return [3 /*break*/, 8];
+                        return [3 /*break*/, 9];
                     case 6:
                         err_1 = _a.sent();
                         return [4 /*yield*/, this.taskErrored(task, err_1)];
                     case 7:
                         _a.sent();
-                        return [3 /*break*/, 8];
-                    case 8: return [2 /*return*/];
+                        return [3 /*break*/, 9];
+                    case 8:
+                        log.close();
+                        return [7 /*endfinally*/];
+                    case 9: return [2 /*return*/];
                 }
             });
         });
