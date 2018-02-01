@@ -166,7 +166,7 @@ var Cronolog = /** @class */ (function () {
                         _a.label = 3;
                     case 3:
                         _a.trys.push([3, 6, 8, 9]);
-                        return [4 /*yield*/, spawn_1.spawn(log, task.cmd.exe, task.cmd.args, task.cmd.cwd)];
+                        return [4 /*yield*/, spawn_1.spawn(log, task.cmd.exe, task.cmd.args || [], task.cmd.cwd)];
                     case 4:
                         _a.sent();
                         return [4 /*yield*/, this.taskComplete(task)];

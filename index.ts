@@ -33,12 +33,12 @@ export interface ICronologCommand {
     // Arguments to be passed to the command.
     // These will be converted to strings.
     //
-    args: any[],
+    args?: any[],
 
     //
     // The working directory in which to run the command.
     //
-    cwd: string;
+    cwd?: string;
 }
 
 // 
@@ -172,7 +172,7 @@ export class Cronolog {
         const log = new TaskLog(task.name);
 
         try {
-            await spawn(log, task.cmd.exe, task.cmd.args, task.cmd.cwd);
+            await spawn(log, task.cmd.exe, task.cmd.args || [], task.cmd.cwd);
 
             await this.taskComplete(task);
         }

@@ -1,8 +1,8 @@
 import { ScheduleLog } from './lib/schedule-log';
 export interface ICronologCommand {
     exe: string;
-    args: any[];
-    cwd: string;
+    args?: any[];
+    cwd?: string;
 }
 export interface ICronologTask {
     name: string;
