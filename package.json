@@ -33,6 +33,7 @@
     "moment": "2.18.1",
     "node-cron": "1.2.1",
     "papaparse": "4.3.6",
+    "prettycron": "0.10.0",
     "yargs": "11.0.0"
   },
   "devDependencies": {

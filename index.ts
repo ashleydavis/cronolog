@@ -6,6 +6,7 @@ import { TaskLog } from './lib/task-log';
 import { ScheduleLog } from './lib/schedule-log';
 
 var cron = require('node-cron');
+var prettyCron = require('prettycron');
 
 //
 // Helper function to map an array of objects.
@@ -175,6 +176,10 @@ export class Cronolog {
             await spawn(log, task.cmd.exe, task.cmd.args || [], task.cmd.cwd);
 
             await this.taskComplete(task);
+
+            if (task.when) {
+                this.log(task.name + " will next run: " + prettyCron.getNext(task.when));
+            }
         }
         catch (err) {
             await this.taskErrored(task, err);
@@ -200,7 +205,10 @@ export class Cronolog {
         }
 
         for (const task of scheduledTasks) {
-            this.log("Staring task " + task.name + " with schedule " + task.when);
+            this.log("Starting task " + task.name);
+            this.log("Cron schedule: " + task.when);
+            this.log("Frequency:     " + prettyCron.toString(task.when));
+            this.log("Next:          " + prettyCron.getNext(task.when));
 
             cron.schedule(task.when, () => {
                 this.runTask(task, taskMap)

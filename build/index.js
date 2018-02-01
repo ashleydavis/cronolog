@@ -40,6 +40,7 @@ var spawn_1 = require("./lib/spawn");
 var task_log_1 = require("./lib/task-log");
 var schedule_log_1 = require("./lib/schedule-log");
 var cron = require('node-cron');
+var prettyCron = require('prettycron');
 //
 // Helper function to map an array of objects.
 //
@@ -172,6 +173,9 @@ var Cronolog = /** @class */ (function () {
                         return [4 /*yield*/, this.taskComplete(task)];
                     case 5:
                         _a.sent();
+                        if (task.when) {
+                            this.log(task.name + " will next run: " + prettyCron.getNext(task.when));
+                        }
                         return [3 /*break*/, 9];
                     case 6:
                         err_1 = _a.sent();
@@ -198,7 +202,10 @@ var Cronolog = /** @class */ (function () {
             throw new Error("Found no scheduled tasks.");
         }
         var _loop_1 = function (task) {
-            this_1.log("Staring task " + task.name + " with schedule " + task.when);
+            this_1.log("Starting task " + task.name);
+            this_1.log("Cron schedule: " + task.when);
+            this_1.log("Frequency:     " + prettyCron.toString(task.when));
+            this_1.log("Next:          " + prettyCron.getNext(task.when));
             cron.schedule(task.when, function () {
                 _this.runTask(task, taskMap)
                     .catch(function (err) {
