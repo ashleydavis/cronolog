@@ -119,7 +119,7 @@ export class Cronolog {
     //
     async taskComplete (task: ICronologTask): Promise<void> {
         // Built on promises for future compatibility.
-        //todo: write to log file.
+
         this.log("Task " + task.name + " has completed with no error."); //TODO: include the datetime it endeed. Include the duration of the task.
 
         this.scheduleLog.taskCompleted(task);
@@ -132,14 +132,18 @@ export class Cronolog {
         // Built on promises for future compatibility.
 
         let errMsg = "";
-        if (err.stack) {
-            errMsg = err.stack.toString();
+        if (Sugar.Object.isError(err)) {
+            if (err.stack) {
+                errMsg = err.stack.toString();
+            }
+            else {
+                errMsg = err.toString();
+            }
         }
         else {
-            errMsg = err.toString();
+            errMsg = "Exit code: " + err;
         }
 
-        //TODO: include the datetime it errored. Include the duration of the task.
         this.log("Task " + task.name + " has errorred.\n" + errMsg);
 
         this.scheduleLog.taskErrored(task, errMsg);
@@ -148,43 +152,54 @@ export class Cronolog {
     /*
      * Run a single dependee task.
      */
-    async runTaskDependee (dependeeName: string, dependentName: string, taskMap: any) {
+    async runTaskDependee (dependeeName: string, dependentName: string, taskMap: any): Promise<boolean> {
         const dependee = taskMap[dependeeName];
         if (!dependee) {
             throw new Error("Failed to find task " + dependeeName + " that is depended upon by task " + dependentName);
         }
 
-        await this.runTask(dependee, taskMap);        
+        return await this.runTask(dependee, taskMap);
     }
 
     //
     // Run the tasks that another task is dependant on.
     //
-    async runTaskDependees (task: ICronologTask, taskMap: any): Promise<void> {
+    async runTaskDependees (task: ICronologTask, taskMap: any): Promise<boolean> {
         if(task.dependsOn) {
             if (Sugar.Object.isArray(task.dependsOn)) {
+                let success = true;
                 for (const dependeeName of task.dependsOn) {
-                    await this.runTaskDependee(dependeeName, task.name, taskMap);
+                    if (!await this.runTaskDependee(dependeeName, task.name, taskMap)) {
+                        success = false;
+                    }
                 }
+                return success;
             }
             else {
-                await this.runTaskDependee(task.dependsOn, task.name, taskMap);
+                return await this.runTaskDependee(task.dependsOn, task.name, taskMap);
             }
         }
+
+        return true;
     }
 
     //
     // Run a task immediately.
     // Runs asyncronously and resolves when the task has completed (or has errorred)
     //
-    async runTask (task: ICronologTask, taskMap: any): Promise<void> {
+    async runTask (task: ICronologTask, taskMap: any): Promise<boolean> {
 
         //
         // First run the tasks we are dependent on.
         //
-        await this.runTaskDependees(task, taskMap);
+        const dependeeSuccess = await this.runTaskDependees(task, taskMap);
 
         await this.taskStarted(task);
+
+        if (!dependeeSuccess) {
+            await this.taskErrored(task, new Error("One or more dependees have failed."));
+            return false;
+        }
 
         const log = new TaskLog(task.name);
 
@@ -199,10 +214,13 @@ export class Cronolog {
         }
         catch (err) {
             await this.taskErrored(task, err);
+            return false;
         }
         finally {
             log.close();
         }
+
+        return true;
     }
 
     //

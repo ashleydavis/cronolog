@@ -57,7 +57,7 @@ export class ScheduleLog implements IScheduleLog {
             Start: moment(startTime).format("YYYY-MM-DD HH:SS"),
             End: moment(endTime).format("YYYY-MM-DD HH:SS"),
             Result: result,
-            ErrMessage: errMsg || "no error",
+            Message: errMsg || "no error",
         };
 
         const needsHeader = !fs.existsSync(this.outputFilePath);

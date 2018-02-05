@@ -8,7 +8,7 @@
             ],
             "cwd": "c:\\"
         },
-        "dependsOn": "task2"
+        "dependsOn": ["task2", "task3"]
     },
 
     "task2": {
@@ -16,6 +16,15 @@
             "exe": "echo",
             "args": [
                 "t2"
+            ],
+            "cwd": "c:\\"
+        }
+    },
+
+    "task3": {
+        "cmd": {
+            "exe": "false",
+            "args": [
             ],
             "cwd": "c:\\"
         }
