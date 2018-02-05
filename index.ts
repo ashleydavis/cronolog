@@ -5,6 +5,7 @@ import { spawn } from './lib/spawn';
 import { TaskLog } from './lib/task-log';
 import { ScheduleLog } from './lib/schedule-log';
 import { argv } from 'yargs';
+import * as Sugar from 'sugar';
 
 var cron = require('node-cron');
 var prettyCron = require('prettycron');
@@ -66,7 +67,7 @@ export interface ICronologTask {
     //
     // Names another task that this task depends on.
     //
-    dependsOn: string;
+    dependsOn: string[] | string;
 };
 
 //
@@ -144,17 +145,31 @@ export class Cronolog {
         this.scheduleLog.taskErrored(task, errMsg);
     }
 
+    /*
+     * Run a single dependee task.
+     */
+    async runTaskDependee (dependeeName: string, dependentName: string, taskMap: any) {
+        const dependee = taskMap[dependeeName];
+        if (!dependee) {
+            throw new Error("Failed to find task " + dependeeName + " that is depended upon by task " + dependentName);
+        }
+
+        await this.runTask(dependee, taskMap);        
+    }
+
     //
     // Run the tasks that another task is dependant on.
     //
     async runTaskDependees (task: ICronologTask, taskMap: any): Promise<void> {
         if(task.dependsOn) {
-            const dependee = taskMap[task.dependsOn];
-            if (!dependee) {
-                throw new Error("Failed to find task " + task.dependsOn + " that is depended upon by task " + task.name);
+            if (Sugar.Object.isArray(task.dependsOn)) {
+                for (const dependeeName of task.dependsOn) {
+                    await this.runTaskDependee(dependeeName, task.name, taskMap);
+                }
             }
-
-            await this.runTask(dependee, taskMap);
+            else {
+                await this.runTaskDependee(task.dependsOn, task.name, taskMap);
+            }
         }
     }
 
@@ -206,10 +221,10 @@ export class Cronolog {
         }
 
         for (const task of scheduledTasks) {
-            this.log("Starting task " + task.name);
-            this.log("Cron schedule: " + task.when);
-            this.log("Frequency:     " + prettyCron.toString(task.when));
-            this.log("Next:          " + prettyCron.getNext(task.when));
+            this.log("Task:      " + task.name);
+            this.log("Schedule:  " + task.when);
+            this.log("Frequency: " + prettyCron.toString(task.when));
+            this.log("Next:      " + prettyCron.getNext(task.when));
 
             cron.schedule(task.when, () => {
                 this.runTask(task, taskMap)
