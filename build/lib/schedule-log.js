@@ -29,7 +29,7 @@ var ScheduleLog = /** @class */ (function () {
             Start: moment(startTime).format("YYYY-MM-DD HH:SS"),
             End: moment(endTime).format("YYYY-MM-DD HH:SS"),
             Result: result,
-            ErrMessage: errMsg || "no error",
+            Message: errMsg || "no error",
         };
         var needsHeader = !fs.existsSync(this.outputFilePath);
         var csvRow = papaparse.unparse([record], { header: needsHeader });

@@ -40,6 +40,7 @@ var spawn_1 = require("./lib/spawn");
 var task_log_1 = require("./lib/task-log");
 var schedule_log_1 = require("./lib/schedule-log");
 var yargs_1 = require("yargs");
+var Sugar = require("sugar");
 var cron = require('node-cron');
 var prettyCron = require('prettycron');
 //
@@ -91,7 +92,6 @@ var Cronolog = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 // Built on promises for future compatibility.
-                //todo: write to log file.
                 this.log("Task " + task.name + " has completed with no error."); //TODO: include the datetime it endeed. Include the duration of the task.
                 this.scheduleLog.taskCompleted(task);
                 return [2 /*return*/];
@@ -106,16 +106,39 @@ var Cronolog = /** @class */ (function () {
             var errMsg;
             return __generator(this, function (_a) {
                 errMsg = "";
-                if (err.stack) {
-                    errMsg = err.stack.toString();
+                if (Sugar.Object.isError(err)) {
+                    if (err.stack) {
+                        errMsg = err.stack.toString();
+                    }
+                    else {
+                        errMsg = err.toString();
+                    }
                 }
                 else {
-                    errMsg = err.toString();
+                    errMsg = "Exit code: " + err;
                 }
-                //TODO: include the datetime it errored. Include the duration of the task.
                 this.log("Task " + task.name + " has errorred.\n" + errMsg);
                 this.scheduleLog.taskErrored(task, errMsg);
                 return [2 /*return*/];
+            });
+        });
+    };
+    /*
+     * Run a single dependee task.
+     */
+    Cronolog.prototype.runTaskDependee = function (dependeeName, dependentName, taskMap) {
+        return __awaiter(this, void 0, void 0, function () {
+            var dependee;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        dependee = taskMap[dependeeName];
+                        if (!dependee) {
+                            throw new Error("Failed to find task " + dependeeName + " that is depended upon by task " + dependentName);
+                        }
+                        return [4 /*yield*/, this.runTask(dependee, taskMap)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
             });
         });
     };
@@ -124,20 +147,31 @@ var Cronolog = /** @class */ (function () {
     //
     Cronolog.prototype.runTaskDependees = function (task, taskMap) {
         return __awaiter(this, void 0, void 0, function () {
-            var dependee;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var success, _i, _a, dependeeName;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        if (!task.dependsOn) return [3 /*break*/, 2];
-                        dependee = taskMap[task.dependsOn];
-                        if (!dependee) {
-                            throw new Error("Failed to find task " + task.dependsOn + " that is depended upon by task " + task.name);
-                        }
-                        return [4 /*yield*/, this.runTask(dependee, taskMap)];
+                        if (!task.dependsOn) return [3 /*break*/, 7];
+                        if (!Sugar.Object.isArray(task.dependsOn)) return [3 /*break*/, 5];
+                        success = true;
+                        _i = 0, _a = task.dependsOn;
+                        _b.label = 1;
                     case 1:
-                        _a.sent();
-                        _a.label = 2;
-                    case 2: return [2 /*return*/];
+                        if (!(_i < _a.length)) return [3 /*break*/, 4];
+                        dependeeName = _a[_i];
+                        return [4 /*yield*/, this.runTaskDependee(dependeeName, task.name, taskMap)];
+                    case 2:
+                        if (!(_b.sent())) {
+                            success = false;
+                        }
+                        _b.label = 3;
+                    case 3:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [2 /*return*/, success];
+                    case 5: return [4 /*yield*/, this.runTaskDependee(task.dependsOn, task.name, taskMap)];
+                    case 6: return [2 /*return*/, _b.sent()];
+                    case 7: return [2 /*return*/, true];
                 }
             });
         });
@@ -148,46 +182,45 @@ var Cronolog = /** @class */ (function () {
     //
     Cronolog.prototype.runTask = function (task, taskMap) {
         return __awaiter(this, void 0, void 0, function () {
-            var log, err_1;
+            var dependeeSuccess, log, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: 
-                    //
-                    // First run the tasks we are dependent on.
-                    //
-                    return [4 /*yield*/, this.runTaskDependees(task, taskMap)];
+                    case 0: return [4 /*yield*/, this.runTaskDependees(task, taskMap)];
                     case 1:
-                        //
-                        // First run the tasks we are dependent on.
-                        //
-                        _a.sent();
+                        dependeeSuccess = _a.sent();
                         return [4 /*yield*/, this.taskStarted(task)];
                     case 2:
                         _a.sent();
-                        log = new task_log_1.TaskLog(task.name);
-                        _a.label = 3;
+                        if (!!dependeeSuccess) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.taskErrored(task, new Error("One or more dependees have failed."))];
                     case 3:
-                        _a.trys.push([3, 6, 8, 9]);
-                        return [4 /*yield*/, spawn_1.spawn(log, yargs_1.argv.copyOutput, task.cmd.exe, task.cmd.args || [], task.cmd.cwd)];
+                        _a.sent();
+                        return [2 /*return*/, false];
                     case 4:
+                        log = new task_log_1.TaskLog(task.name);
+                        _a.label = 5;
+                    case 5:
+                        _a.trys.push([5, 8, 10, 11]);
+                        return [4 /*yield*/, spawn_1.spawn(log, yargs_1.argv.copyOutput, task.cmd.exe, task.cmd.args || [], task.cmd.cwd)];
+                    case 6:
                         _a.sent();
                         return [4 /*yield*/, this.taskComplete(task)];
-                    case 5:
+                    case 7:
                         _a.sent();
                         if (task.when) {
                             this.log(task.name + " will next run: " + prettyCron.getNext(task.when));
                         }
-                        return [3 /*break*/, 9];
-                    case 6:
+                        return [3 /*break*/, 11];
+                    case 8:
                         err_1 = _a.sent();
                         return [4 /*yield*/, this.taskErrored(task, err_1)];
-                    case 7:
+                    case 9:
                         _a.sent();
-                        return [3 /*break*/, 9];
-                    case 8:
+                        return [2 /*return*/, false];
+                    case 10:
                         log.close();
                         return [7 /*endfinally*/];
-                    case 9: return [2 /*return*/];
+                    case 11: return [2 /*return*/, true];
                 }
             });
         });
@@ -203,10 +236,10 @@ var Cronolog = /** @class */ (function () {
             throw new Error("Found no scheduled tasks.");
         }
         var _loop_1 = function (task) {
-            this_1.log("Starting task " + task.name);
-            this_1.log("Cron schedule: " + task.when);
-            this_1.log("Frequency:     " + prettyCron.toString(task.when));
-            this_1.log("Next:          " + prettyCron.getNext(task.when));
+            this_1.log("Task:      " + task.name);
+            this_1.log("Schedule:  " + task.when);
+            this_1.log("Frequency: " + prettyCron.toString(task.when));
+            this_1.log("Next:      " + prettyCron.getNext(task.when));
             cron.schedule(task.when, function () {
                 _this.runTask(task, taskMap)
                     .catch(function (err) {

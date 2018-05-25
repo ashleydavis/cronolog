@@ -15,5 +15,12 @@ var config = {
     tasks: tasks,
 };
 var cronolog = new index_1.Cronolog(config);
-cronolog.scheduleTasks();
+try {
+    cronolog.scheduleTasks();
+}
+catch (err) {
+    console.error("Cronolog log failed.");
+    console.error(err && err.stack || err);
+    process.exit(1);
+}
 //# sourceMappingURL=cli.js.map
