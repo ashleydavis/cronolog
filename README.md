@@ -2,6 +2,8 @@
 
 A simple light-weight cron-based task runner.
 
+[Click here to support my work](https://www.codecapers.com.au/about#support-my-work)
+
 ## Features
 
 - Schedule numerous named tasks using the cron syntax.
